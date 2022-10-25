@@ -8,8 +8,10 @@ spec:
   ports:
     - port: 80
       targetPort: 80
+      nodePort: 30009
   selector:
     app: win-webserver
+  type: NodePort
 ---
 apiVersion: apps/v1
 kind: DaemonSet

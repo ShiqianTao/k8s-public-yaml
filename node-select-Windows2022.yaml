@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: win22webserver
+  labels:
+    app: win22webserver
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: win22webserver
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: win22webserver
+  name: win22webserver
+spec:
+  selector:
+    matchLabels:
+      app: win22webserver
+  template:
+    metadata:
+      labels:
+        app: win22webserver
+      name: win22webserver
+    spec:
+      tolerations:
+        - effect: NoSchedule
+          key: kubernetes.io/os
+          value: windows
+      nodeSelector:
+        kubernetes.io/os: windows
+        kubernetes.azure.com/os-sku: Windows2022
+      containers:
+      - name: sample
+        image: mcr.microsoft.com/dotnet/framework/samples:aspnetapp
+        resources:
+          limits:
+            cpu: 1
+            memory: 800M
+          requests:
+            cpu: .1
+            memory: 300M
+        ports:
+          - containerPort: 80

@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: win19webserver
+  labels:
+    app: win19webserver
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: win19webserver
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: win19webserver
+  name: win19webserver
+spec:
+  selector:
+    matchLabels:
+      app: win19webserver
+  template:
+    metadata:
+      labels:
+        app: win19webserver
+      name: win19webserver
+    spec:
+      tolerations:
+        - effect: NoSchedule
+          key: kubernetes.io/os
+          value: windows
+      nodeSelector:
+        kubernetes.io/os: windows
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.azure.com/os-sku
+                operator: NotIn
+                values:
+                - Windows2022
+      containers:
+      - name: sample
+        image: mcr.microsoft.com/dotnet/framework/samples:aspnetapp
+        resources:
+          limits:
+            cpu: 1
+            memory: 800M
+          requests:
+            cpu: .1
+            memory: 300M
+        ports:
+          - containerPort: 80

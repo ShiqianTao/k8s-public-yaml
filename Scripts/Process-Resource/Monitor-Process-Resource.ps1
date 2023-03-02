@@ -5,7 +5,7 @@ $Interval = 60 # 60 second
 $MaxTime = 60 * 60  * 24 * 3 # 3 days
 for ($curTime = 0; $curTime -lt $MaxTime; $curTime+=$Interval) {
     Timestamp | Out-File -Append -Filepath $LogFilepath        
-    systeminfo | find "Virtual Memory"  | Out-File -Append -Filepath $LogFilepath
+    systeminfo | findstr "Memory" | Out-File -Append -Filepath $LogFilepath
     Get-Process | Sort-Object WorkingSet -Descending | Select-Object -First $ProcessNumber | Out-File -Append -Filepath $LogFilepath
     Start-Sleep -s $Interval
 }

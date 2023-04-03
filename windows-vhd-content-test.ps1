@@ -1,3 +1,4 @@
+Set-PSDebug -Trace 1
 
 # We use parameters for test script so we set environment variables before importing c:\windows-vhd-configuration.ps1 to reuse it
 $env:ContainerRuntime="containerd"
@@ -312,7 +313,6 @@ function Test-ExcludeUDPSourcePort {
     }
 }
 
-Write-Log "TSQ: TEST"
 Get-Service -Name hns -ErrorAction Ignore
 
 Test-FilesToCacheOnVHD

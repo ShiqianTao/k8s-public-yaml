@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: aks-ssh
-    image: nginx
+    image: mcr.microsoft.com/mirror/docker/library/nginx:1.25
     lifecycle:
       postStart:
         exec:

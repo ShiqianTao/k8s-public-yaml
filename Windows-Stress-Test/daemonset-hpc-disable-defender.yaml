@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: hpc-disable-defender
+  labels:
+    app: hpc-disable-defender
+spec:
+  selector:
+    matchLabels:
+      app: hpc-disable-defender
+  template:
+    metadata:
+      labels:
+        app: hpc-disable-defender
+    spec:
+      securityContext:
+        windowsOptions:
+          hostProcess: true
+          runAsUserName: "NT AUTHORITY\\SYSTEM"
+      hostNetwork: true
+      nodeSelector:
+        kubernetes.io/os: windows
+      containers:
+      - name: hpc-disable-defender
+        imagePullPolicy: IfNotPresent
+        image: mcr.microsoft.com/windows/servercore:ltsc2022
+        command:
+        - powershell.exe
+        args:
+        - -command
+        - "while ($true) { $currentDateTime = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'; $mpPreference = Get-MpPreference; if ($mpPreference.DisableRealtimeMonitoring -eq $true) { Write-Host \"$currentDateTime - DisableRealtimeMonitoring is already true: $($mpPreference.DisableRealtimeMonitoring)\"; } else { Write-Host \"$currentDateTime - DisableRealtimeMonitoring is false. Setting DisableRealtimeMonitoring to true\"; Set-MpPreference -DisableRealtimeMonitoring $true; $updatedPreference = Get-MpPreference; Write-Host \"$currentDateTime - Set done. DisableRealtimeMonitoring's value: $($updatedPreference.DisableRealtimeMonitoring)\"; }; Start-Sleep -Seconds 3600; };"

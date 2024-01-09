@@ -13,6 +13,7 @@ spec:
       labels:
         app: hpc-disable-defender
     spec:
+      priorityClassName: system-node-critical
       securityContext:
         windowsOptions:
           hostProcess: true

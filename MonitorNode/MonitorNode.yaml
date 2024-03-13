@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: monitor-node
+  name: monitor-node
+spec:
+  selector:
+    matchLabels:
+      app: monitor-node
+  template:
+    metadata:
+      labels:
+        app: monitor-node
+      name: monitor-node
+    spec:
+      tolerations:
+        - key: CriticalAddonsOnly
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
+      securityContext:
+        windowsOptions:
+          hostProcess: true
+          runAsUserName: "NT AUTHORITY\\SYSTEM"
+        runAsNonRoot: false
+      hostNetwork: true
+      nodeSelector:
+        kubernetes.io/os: windows
+        kubernetes.io/hostname: <node-name>
+      containers:
+      - name: monitorwindowsnode
+        securityContext:
+          privileged: true
+        image: mcr.microsoft.com/windows/servercore:1809
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - powershell.exe
+              - -command
+              - |
+                # Upload the logs to the storage account
+        command:
+        - powershell.exe
+        - -command
+        - |
+          $logDirectory = "C:\monitor-node-logs"
+          $logFile = "$logDirectory\log.txt"
+
+          while ($true) {
+            $startTime = Get-Date
+            
+            # Retrieve memory usage information for all processes
+            $memoryUsageCounter = Get-Counter -Counter "\Process(*)\Working Set - Private"
+            $totalMemory = (Get-Counter "\Memory\Available Bytes").CounterSamples.CookedValue
+            $nodeMemoryUsage = @{}
+
+            # Extract memory usage information for each process (node)
+            foreach ($counterSample in $memoryUsageCounter.CounterSamples) {
+                $nodeName = $counterSample.InstanceName
+                $memoryUsage = $counterSample.CookedValue
+                $nodeMemoryUsage[$nodeName] = $memoryUsage
+            }
+
+            # Calculate percent memory usage for each process (node)
+            $percentMemoryUsage = @{}
+            foreach ($nodeName in $nodeMemoryUsage.Keys) {
+                $percentMemoryUsage[$nodeName] = ($nodeMemoryUsage[$nodeName] / $totalMemory) * 100
+            }
+
+            $response = Invoke-WebRequest -Uri "http://www.google.com" -UseBasicParsing
+            if ($response.StatusCode -eq 200) {
+                $success = $true
+            } else {
+                $success = $false
+            }
+            $endTime = Get-Date
+            $duration = $endTime - $startTime
+
+            # Log the information including node memory usage details
+            $logMessage = "Time: $($startTime.ToString()), URL: $($response.BaseResponse.ResponseUri), Success: $success, Duration: $duration"
+
+            foreach ($nodeName in $nodeMemoryUsage.Keys) {
+                $logMessage += ", Node: $nodeName, Memory Usage: $($nodeMemoryUsage[$nodeName]) bytes, Percent Memory: $($percentMemoryUsage[$nodeName])%"
+            }
+
+            # Log more information, such as network usage
+
+            Add-Content -Path $logFile -Value $logMessage
+
+            # Sleep for 10 minutes
+            Start-Sleep -Seconds (10 * 60)
+          }
+
+
+
+
+

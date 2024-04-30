@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: windows-powershell-hpc
+  name: windows-powershell-hpc
+spec:
+  selector:
+    matchLabels:
+      app: windows-powershell-hpc
+  template:
+    metadata:
+      labels:
+        app: windows-powershell-hpc
+    spec:
+      nodeSelector:
+        kubernetes.io/os: windows
+      securityContext:
+        windowsOptions:
+          hostProcess: true
+          runAsUserName: "NT AUTHORITY\\system"
+      hostNetwork: true
+      containers:
+      - name: windows-powershell-hpc
+        image: mcr.microsoft.com/powershell:lts-nanoserver-1809
+        command: ["powershell"]
+        args: ["while ($true) { curl.exe http://localhost:19182/health; Start-Sleep 86400; }"]

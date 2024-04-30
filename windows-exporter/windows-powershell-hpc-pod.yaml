@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: windows-powershell-hpc-pod
+spec:
+  nodeSelector:
+    kubernetes.io/os: windows
+  securityContext:
+    windowsOptions:
+      hostProcess: true
+      runAsUserName: "NT AUTHORITY\\system"
+  hostNetwork: true
+  containers:
+  - name: windows-powershell-hpc-pod
+    image: mcr.microsoft.com/powershell:lts-nanoserver-1809
+    command: ["powershell"]
+    args: ["while ($true) { curl.exe http://localhost:19182/health; Start-Sleep 86400; }"]

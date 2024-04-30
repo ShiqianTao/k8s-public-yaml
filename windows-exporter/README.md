@@ -1,3 +1,6 @@
+## Note
+A draft for testing.
+
 ## Enable
 Please submit a request to Microsoft.
 
@@ -10,7 +13,7 @@ Create an AKS cluster with Windows agent pool. We can see `AKSWindowsExtension` 
 
 ## Windows Exporter
 
-With `AKS.Windows.Node.Extension` all Windows nodes have installed `windows-exporter`.
+With `AKSWindowsExtension` all Windows nodes have installed `windows-exporter`.
 
 - Apply a Windows PowerShell pod to a Windows node.
 

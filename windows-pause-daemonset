@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: windows-pause
+  name: windows-pause
+spec:
+  selector:
+    matchLabels:
+      app: windows-pause
+  template:
+    metadata:
+      labels:
+        app: windows-pause
+      name: windows-pause
+    spec:
+      nodeSelector:
+        kubernetes.io/os: windows
+      containers:
+      - name: windows-pause
+        image: mcr.microsoft.com/oss/kubernetes/pause:3.9-hotfix-20230808
